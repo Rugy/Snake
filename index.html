@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<head>
+  <title>Simple Snake Application</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <script type="text/javascript">
+    $(function() {
+      console.log("Hello");
+      context = $("#game-board")[0].getContext("2d");
+
+      boardsize = 500;
+      snakeTileSize = 20;
+
+      tailPart = null;
+      hasTailPart = false;
+
+      xDirection = 1;
+      yDirection = 0;
+
+      snake = [3];
+      snake[0] = snakeSegment(2, 0);
+      snake[1] = snakeSegment(1, 0);
+      snake[2] = snakeSegment(0, 0);
+
+      setInterval(function() {
+        gameLoop();
+      }, 250);
+
+      $(window).keypress(function(event) {
+        console.log(event.charCode);
+
+        if (event.charCode == 97 && xDirection != 1) {
+          xDirection = -1;
+          yDirection = 0;
+        }
+
+        if (event.charCode == 115 && yDirection != -1) {
+          xDirection = 0;
+          yDirection = 1;
+        }
+
+        if (event.charCode == 100 && xDirection != -1) {
+          xDirection = 1;
+          yDirection = 0;
+        }
+
+        if (event.charCode == 119 && yDirection != 1) {
+          xDirection = 0;
+          yDirection = -1;
+        }
+      });
+    });
+
+    snakeSegment = function(xTile, yTile) {
+      return {
+        x: xTile,
+        y: yTile
+      }
+    }
+
+    gameLoop = function() {
+      for (let i = snake.length - 1; i > 0; i--) {
+        snake[i].x = snake[i - 1].x;
+        snake[i].y = snake[i - 1].y;
+      }
+
+      snake[0].x += xDirection;
+      snake[0].y += yDirection;
+
+      if (snake[0].x > (boardsize / snakeTileSize - 1)) {
+        snake[0].x = 0
+      }
+
+      if (snake[0].y > (boardsize / snakeTileSize - 1)) {
+        snake[0].y = 0
+      }
+
+      if (snake[0].x < 0) {
+        snake[0].x = 24;
+      }
+
+      if (snake[0].y < 0) {
+        snake[0].y = 24;
+      }
+
+      if (tailPart != null && snake[0].x == tailPart.x && snake[0].y == tailPart.y) {
+        hasTailPart = false;
+        snake.push(snakeSegment(snake[snake.length - 1].x, snake[snake.length - 1].y));
+      }
+
+      if (!hasTailPart) {
+        xRand = Math.floor(Math.random() * 25);
+        yRand = Math.floor(Math.random() * 25);
+        tailPart = {
+          x: xRand,
+          y: yRand
+        }
+
+        hasTailPart = true;
+      }
+
+      render();
+    }
+
+    render = function() {
+      drawBoard();
+      drawSnake(snake);
+      drawTailPart();
+    }
+
+    drawBoard = function() {
+      context.fillStyle = "yellow";
+      context.fillRect(0, 0, boardsize, boardsize);
+    }
+
+    drawSnake = function(snake) {
+      for (let i = 0; i < snake.length; i++) {
+        context.fillStyle = "red";
+        context.fillRect(snake[i].x * snakeTileSize, snake[i].y * snakeTileSize, snakeTileSize, snakeTileSize);
+      }
+    }
+
+    drawTailPart = function() {
+      context.fillStyle = "blue";
+      context.fillRect(tailPart.x * snakeTileSize, tailPart.y * snakeTileSize, snakeTileSize, snakeTileSize);
+    }
+
+  </script>
+
+  <div id="key-wrapper">
+    <canvas id="game-board" width="500" height="500">
+    </canvas>
+  </div>
+
+</body>
